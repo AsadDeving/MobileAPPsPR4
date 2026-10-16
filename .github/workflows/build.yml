@@ -43,6 +43,20 @@ jobs:
           fi
           grep "Unresolved reference 'asExecutor'" q19.log
 
+      - name: "Practice 4.1: shared, Android app, desktop app, feature + umbrella modules"
+        run: >
+          ./gradlew
+          :shared:printSourceSets
+          :shared:jvmTest
+          :shared:testDebugUnitTest
+          :androidApp:testDebugUnitTest
+          :androidApp:assembleDebug
+          :desktopApp:test
+          :feature:profile:jvmTest
+          :umbrella:jvmTest
+      - name: "Practice 4.1: run the desktop app"
+        run: ./gradlew -q :desktopApp:run --args="student@ttpu.uz secret123"
+
   ios:
     name: iOS
     runs-on: macos-latest
@@ -62,3 +76,33 @@ jobs:
           :template-lab:compileKotlinIosArm64
           :dependencies-lab:iosSimulatorArm64Test
           :dependencies-lab:compileKotlinIosArm64
+      - name: "Practice 4.1: shared iOS tests (Task 12) and frameworks"
+        run: >
+          ./gradlew
+          :shared:iosSimulatorArm64Test
+          :shared:linkDebugFrameworkIosSimulatorArm64
+          :umbrella:iosSimulatorArm64Test
+          :umbrella:linkDebugFrameworkIosSimulatorArm64
+      - name: "Task 14: typecheck the SwiftUI files against the Kotlin framework"
+        run: >
+          xcrun --sdk iphonesimulator swiftc -typecheck
+          -target arm64-apple-ios15.0-simulator
+          -F shared/build/bin/iosSimulatorArm64/debugFramework
+          iosApp/iosApp/*.swift
+      - name: "Task 19/20: exported feature types are in the umbrella header; without export they are not"
+        run: |
+          HEADER=umbrella/build/bin/iosSimulatorArm64/debugFramework/Shared.framework/Headers/Shared.h
+          grep -E "SessionStore|ProfileService" "$HEADER"
+          ./gradlew :umbrella:linkDebugFrameworkIosSimulatorArm64 -Ptask20.broken=true
+          if grep -q "SessionStore" "$HEADER"; then echo "SessionStore should be hidden without export()"; exit 1; fi
+          echo "Without api() + export(), SessionStore is not visible to Swift."
+      - name: "Task 25: XCFramework + Swift package checksum"
+        run: |
+          ./gradlew :shared:assembleSharedXCFramework
+          cd shared/build/XCFrameworks/release
+          zip -qr Shared.xcframework.zip Shared.xcframework
+          swift package compute-checksum Shared.xcframework.zip
+      - name: "Task 24: publish to mavenLocal()"
+        run: |
+          ./gradlew :shared:publishToMavenLocal
+          find ~/.m2/repository/uz/ttpu -name "*.module" | sort
