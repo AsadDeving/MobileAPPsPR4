@@ -1,8 +1,10 @@
-# KMP Advanced Project Structure: Practice 4
+# KMP Advanced Project Structure: Practice 4 and 4.1
 
 Kotlin Multiplatform practice project for **Lectures 10–11** (advanced project structure · choosing a project configuration). It continues [Practice 3](https://github.com/AsadDeving/MobileAPPsPR3), which covered Questions 1–13.
 
-📄 **Sections 3–4 (Questions 14–25) are answered in [`ANSWERS.md`](ANSWERS.md).** Hands-on answers link to the code in this repository and show the real Gradle output.
+📄 **Practice 4, Sections 3–4 (Questions 14–25), is answered in [`ANSWERS.md`](ANSWERS.md).** Hands-on answers link to the code in this repository and show the real Gradle output.
+
+📄 **Practice 4.1 (Tasks 1–30, Lectures 8–11) is answered in [`PRACTICE_4.1.md`](PRACTICE_4.1.md).** It comes with a small login app shared between Android, desktop and iOS.
 
 ## Modules
 
@@ -11,6 +13,11 @@ Kotlin Multiplatform practice project for **Lectures 10–11** (advanced project
 ├── advanced-lab/       JVM + JS + Linux + iOS, custom jvmAndJsMain via manual dependsOn (Q16, Q17, Q21)
 ├── template-lab/       same targets, default hierarchy template + custom group (Q17)
 ├── dependencies-lab/   propagation, compatibility, version alignment (Q18, Q19, Q20)
+├── shared/             Practice 4.1: KMP library (Android, desktop JVM, iOS), LoginValidator, XCFramework, maven-publish
+├── androidApp/         Practice 4.1: Jetpack Compose login screen + LoginViewModel
+├── desktopApp/         Practice 4.1: JVM desktop app using :shared
+├── feature/auth, feature/profile, umbrella/   Practice 4.1: feature modules + umbrella "Shared" framework
+├── iosApp/, swift-package/                    Practice 4.1: SwiftUI view model, Package.swift binaryTarget
 ├── build-logic/        convention plugin: printSourceSets / printCompilations report tasks (Lecture 7)
 └── gradle/libs.versions.toml   single version catalog
 ```
@@ -29,7 +36,7 @@ Kotlin Multiplatform practice project for **Lectures 10–11** (advanced project
 
 ## Build and test
 
-Requirements: JDK 17+. Building the iOS targets also needs macOS + Xcode.
+Requirements: JDK 17+ and the Android SDK (Android Studio sets it up). Building the iOS targets also needs macOS + Xcode.
 
 ```bash
 ./gradlew :advanced-lab:printSourceSets :template-lab:printSourceSets      # Q16 / Q17
@@ -40,6 +47,12 @@ Requirements: JDK 17+. Building the iOS targets also needs macOS + Xcode.
 ./gradlew :advanced-lab:jvmTest :advanced-lab:compileKotlinJs :template-lab:jvmTest :dependencies-lab:jvmTest
 ./gradlew :advanced-lab:linuxX64Test :template-lab:linuxX64Test             # Linux
 ./gradlew :dependencies-lab:iosSimulatorArm64Test                          # macOS
+
+# Practice 4.1
+./gradlew :shared:jvmTest :shared:testDebugUnitTest :androidApp:testDebugUnitTest :androidApp:assembleDebug
+./gradlew :desktopApp:run --args="student@ttpu.uz secret123"
+./gradlew :shared:iosSimulatorArm64Test :shared:assembleSharedXCFramework :umbrella:linkDebugFrameworkIosSimulatorArm64   # macOS
+./gradlew :shared:publishToMavenLocal
 ```
 
 GitHub Actions ([`.github/workflows/build.yml`](.github/workflows/build.yml)) runs all of these on Ubuntu (JVM, JS, Linux) and macOS (iOS). It also checks that the Q19 build fails with exactly `Unresolved reference 'asExecutor'`.
