@@ -1,0 +1,17 @@
+[versions]
+kotlin = "2.2.20"
+# Q18-Q20 use the exact versions from Lecture 10.
+coroutines-lecture = "1.7.3"
+# Stand-in for androidx.navigation-compose:2.7.7: a JVM-only library that needs coroutines 1.8.0+ (see ANSWERS.md, Q20).
+coroutines-newer = "1.8.0"
+# Q20: a version tried out in iosTest only; it must not leak into any *Main source set.
+coroutines-test-experiment = "1.8.1"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines-lecture" }
+kotlinx-coroutines-core-experiment = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines-test-experiment" }
+kotlinx-coroutines-reactive = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive", version.ref = "coroutines-newer" }
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
